@@ -1,0 +1,92 @@
+x-app: &app
+  image: hitobito-wesen:latest
+  build:
+    context: .
+    dockerfile: hitobito/Dockerfile
+    target: app
+    args:
+      HITOBITO_PROJECT: wesen
+      HITOBITO_STAGE: production
+  env_file: .env
+  environment:
+    RAILS_DB_HOST: postgres
+    RAILS_DB_NAME: hitobito
+    RAILS_DB_USERNAME: hitobito
+    RAILS_DB_PASSWORD: ${POSTGRES_PASSWORD}
+    RAILS_CACHE_REDIS_URL: redis://redis:6379/0
+    RAILS_ACTIONCABLE_REDIS_URL: redis://redis:6379/1
+    RAILS_LOG_TO_STDOUT: "1"
+    RAILS_SERVE_STATIC_FILES: "1"
+    RAILS_HOST_NAME_INTERNAL: localhost
+  volumes:
+    - uploads:/app-src/public/uploads
+  secrets:
+    - source: mail_yml
+      target: /app-src/config/mail.yml
+  restart: unless-stopped
+  depends_on: &app-deps
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_started
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: hitobito
+      POSTGRES_USER: hitobito
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "pg_isready -U hitobito -d hitobito"
+      interval: 5s
+    restart: unless-stopped
+
+  redis:
+    image: redis:8-alpine
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  migrate:
+    <<: *app
+    command: bundle exec rails db:migrate wagon:migrate db:seed wagon:seed
+    restart: "no"
+
+  rails:
+    <<: *app
+    command: bundle exec puma
+    ports:
+      - "3000:3000"
+    depends_on:
+      <<: *app-deps
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - "CMD"
+        - "curl"
+        - "-fsS"
+        - "http://localhost:3000/healthz"
+      interval: 30s
+
+  worker:
+    <<: *app
+    command: bundle exec rails jobs:work
+    depends_on:
+      <<: *app-deps
+      migrate:
+        condition: service_completed_successfully
+
+secrets:
+  mail_yml:
+    file: ./mail.yml
+
+volumes:
+  pg_data:
+  redis_data:
+  uploads:

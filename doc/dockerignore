@@ -1,0 +1,17 @@
+# deployment secrets next to docker-compose.yaml
+.env
+mail.yml
+
+# local files from developer checkouts
+**/config/mail.yml
+**/config/settings.local.yml
+**/config/settings/*.local.yml
+**/config/environments/*.local.yml
+**/.envrc
+**/node_modules
+**/tmp
+**/log/*.log
+hitobito/Wagonfile
+hitobito/Gemfile.local*
+hitobito/public/assets
+hitobito/public/uploads

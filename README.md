@@ -21,3 +21,7 @@ of Wesen.
 
 (Output of rake app:hitobito:roles)
 <!-- roles:end -->
+
+## Deployment
+
+See doc/README.md
