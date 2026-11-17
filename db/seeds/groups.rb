@@ -6,4 +6,10 @@
 #  https://github.com/kronn/hitobito_wesen.
 
 
-Group::Root.seed_once(:parent_id, name: "Hauptgruppe")
+Group::Wesen.seed_once(:parent_id, name: "Alle Wesen")
+
+root = Group.roots.first
+
+Group::WesenGruppe.seed_once(:name, parent_id: root.id, name: "FINTA")
+Group::WesenGruppe.seed_once(:name, parent_id: root.id, name: "Regional Bern", short_name: "Bern")
+Group::WesenGruppe.seed_once(:name, parent_id: root.id, name: "Regional Zürich", short_name: "Zürich")
