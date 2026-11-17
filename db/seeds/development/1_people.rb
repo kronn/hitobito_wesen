@@ -12,7 +12,7 @@ class WesenPersonSeeder < PersonSeeder
 
   def amount(role_type)
     case role_type.name.demodulize
-    when "Member" then 5
+    when "Wesen" then 5
     else 1
     end
   end
@@ -20,20 +20,12 @@ class WesenPersonSeeder < PersonSeeder
 end
 
 puzzlers = [
-  "Carlo Beltrame",
-  "Olivier Brian",
-  "Oliver Dietschi",
-  "Thomas Ellenberger",
-  "Daniel Illi",
-  "Niklas Jäggi",
-  "Andreas Maierhofer",
-  "Nils Rauch",
   "Matthias Viehweger",
-  "Pascal Zumkehr",
+  "Raphaela Seeger",
 ]
 
 devs = {
-  "Customer Name" => "customer@email.com"
+  # "Customer Name" => "customer@email.com"
 }
 puzzlers.each do |puz|
   devs[puz] = "#{puz.split.last.downcase.gsub("ü", "ue").gsub("ä", "ae")}@puzzle.ch"
@@ -45,5 +37,5 @@ seeder.seed_all_roles
 
 root = Group.root
 devs.each do |name, email|
-  seeder.seed_developer(name, email, root, Group::Root::Leader)
+  seeder.seed_developer(name, email, root, Group::Wesen::Administration)
 end
